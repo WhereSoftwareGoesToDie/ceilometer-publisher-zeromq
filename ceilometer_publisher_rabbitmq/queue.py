@@ -3,6 +3,9 @@ from oslo.config import cfg
 import pika
 
 OPTS = [
+    cfg.StrOpt('rabbit_user'),
+    cfg.StrOpt('rabbit_password',
+               default='use_more_haskell_123'),
     cfg.StrOpt('publisher_queue',
                default='publisher-queue',
                help='The rabbit queue to bind the exchange to'),
