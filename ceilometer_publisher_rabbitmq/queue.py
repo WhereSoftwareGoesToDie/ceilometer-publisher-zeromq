@@ -50,4 +50,4 @@ class QueuePublisher(publisher.PublisherBase):
             self.channel.basic_publish(exchange=self.exchange,
                                        routing_key='',
                                        body=message)
-            LOG.debug(_("Queue Publisher published sample to exchange %s") % (self.exchange))
+            LOG.debug(_("Queue Publisher published %s to exchange %s") % (message, self.exchange))
