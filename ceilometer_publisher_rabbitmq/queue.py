@@ -1,4 +1,5 @@
 from ceilometer import publisher
+from ceilometer.openstack.common.gettextutils import _
 from ceilometer.openstack.common import log
 from oslo.config import cfg
 import pika
@@ -48,6 +49,5 @@ class QueuePublisher(publisher.PublisherBase):
             message = str(sample.as_dict())
             self.channel.basic_publish(exchange=self.exchange,
                                        routing_key='',
-                                       properties=pika.spec.BasicProperties(),
                                        body=message)
-            LOG.debug("Queue Publisher published sample")
+            LOG.debug(_("Queue Publisher published sample to exchange %s") % (self.exchange))
