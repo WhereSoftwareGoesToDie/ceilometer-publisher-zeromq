@@ -49,5 +49,7 @@ class QueuePublisher(publisher.PublisherBase):
             message = str(sample.as_dict())
             self.channel.basic_publish(exchange=self.exchange,
                                        routing_key='',
-                                       body=message)
+                                       body=message,
+                                       mandatory=True,
+                                       immediate=True)
             LOG.debug(_("Queue Publisher published %s to exchange %s") % (message, self.exchange))
