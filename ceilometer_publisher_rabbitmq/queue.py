@@ -43,4 +43,5 @@ class QueuePublisher(publisher.PublisherBase):
         for sample in samples:
             message = str(sample.as_dict())
             self.channel.basic_publish(exchange=self.exchange,
+                                       properties=pika.spec.BasicProperties(),
                                        body=message)
