@@ -1,6 +1,9 @@
 from ceilometer import publisher
+from ceilometer.openstack.common import log
 from oslo.config import cfg
 import pika
+
+LOG = log.getLogger(__name__)
 
 OPTS = [
     cfg.StrOpt('publisher_rabbit_host'),
@@ -41,8 +44,10 @@ class QueuePublisher(publisher.PublisherBase):
         Converts each sample into a string of JSON and publishes it the setup rabbit queue
         """
         for sample in samples:
+            LOG.debug("Queue Publisher got sample")
             message = str(sample.as_dict())
             self.channel.basic_publish(exchange=self.exchange,
                                        routing_key='',
                                        properties=pika.spec.BasicProperties(),
                                        body=message)
+            LOG.debug("Queue Publisher published sample")
