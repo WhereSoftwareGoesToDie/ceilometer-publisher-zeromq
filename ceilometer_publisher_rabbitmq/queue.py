@@ -3,14 +3,10 @@ from oslo.config import cfg
 import pika
 
 OPTS = [
-    cfg.StrOpt('rabbit_hosts'),
-    cfg.StrOpt('rabbit_user'),
-    cfg.StrOpt('rabbit_password',
-               default='use_more_haskell_123'),
     cfg.StrOpt('publisher_queue',
                default='publisher-queue',
                help='The rabbit queue to bind the exchange to'),
-    cfg.StrOpt('rabbit_exchange',
+    cfg.StrOpt('publisher_exchange',
                default='publisher-exchange',
                help='The exchange to use for publishing samples')
 ]
@@ -30,7 +26,7 @@ class QueuePublisher(publisher.PublisherBase):
                                                                             virtual_host='/',
                                                                             credentials=credentials))
         self.channel = self.connection.channel()
-        self.exchange = cfg.CONF.rabbit_exchangengs['exchange']
+        self.exchange = cfg.CONF.rabbit_exchange
         self.channel.exchange_declare(exchange=self.exchange)
         queue = cfg.CONF.publisher_queue
         self.channel.queue_declare(queue=queue)
