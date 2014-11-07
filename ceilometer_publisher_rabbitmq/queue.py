@@ -21,7 +21,7 @@ class QueuePublisher(publisher.PublisherBase):
     """Republishes all received samples to a rabbit queue"""
 
     def __init__(self, parsed_url):
-        super(QueuePublisher).__init__(self, parsed_url)
+        super(QueuePublisher, self).__init__(parsed_url)
         credentials = pika.credentials.PlainCredentials(username = cfg.CONF.rabbit_user,
                                                         password = cfg.CONF.rabbit_password,
                                                         erase_on_connect = True)
