@@ -12,9 +12,6 @@ OPTS = [
     cfg.StrOpt('publisher_rabbit_user'),
     cfg.StrOpt('publisher_rabbit_password',
                default='use_more_haskell_123'),
-    cfg.StrOpt('publisher_queue',
-               default='publisher-queue',
-               help='The rabbit queue to bind the exchange to'),
     cfg.StrOpt('publisher_exchange',
                default='publisher-exchange',
                help='The exchange to use for publishing samples')
@@ -36,7 +33,6 @@ class QueuePublisher(publisher.PublisherBase):
                                                                             credentials=credentials))
         self.channel = self.connection.channel()
         self.exchange = cfg.CONF.publisher_exchange
-        self.channel.queue_bind(queue=cfg.CONF.publisher_queue, exchange=self.exchange)
 
     def publish_samples(self, context, samples):
         """

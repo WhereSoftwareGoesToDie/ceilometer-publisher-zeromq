@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name="ceilometer-publisher-rabbitmq",
-    version="0.0.1",
+    version="0.0.2",
     description="A publisher plugin for Ceilometer that outputs to RabbitMQ",
     author="Oswyn Brent",
     author_email="engineering@anchor.net.au",
