@@ -10,8 +10,11 @@ LOG = log.getLogger(__name__)
 OPTS = [
     cfg.StrOpt('publisher_rabbit_host'),
     cfg.StrOpt('publisher_rabbit_user'),
-    cfg.StrOpt('publisher_rabbit_password',
-               default='use_more_haskell_123'),
+    cfg.StrOpt('publisher_rabbit_password'),
+    cfg.IntOpt('publisher_rabbit_port',
+               default=5672),
+    cfg.StrOpt('publisher_rabbit_virtual_host',
+               default='/'),
     cfg.StrOpt('publisher_exchange',
                default='publisher-exchange',
                help='The exchange to use for publishing samples')
@@ -28,8 +31,8 @@ class QueuePublisher(publisher.PublisherBase):
                                                         password = cfg.CONF.publisher_rabbit_password,
                                                         erase_on_connect = True)
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=cfg.CONF.publisher_rabbit_host,
-                                                                            port=5672,
-                                                                            virtual_host='/',
+                                                                            port=cfg.CONF.publisher_rabbit_port,
+                                                                            virtual_host=cfg.CONF.publisher_rabbit_virtual_host,
                                                                             credentials=credentials))
         self.channel = self.connection.channel()
         self.exchange = cfg.CONF.publisher_exchange
