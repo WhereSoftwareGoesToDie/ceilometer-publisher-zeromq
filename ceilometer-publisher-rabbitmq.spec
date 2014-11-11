@@ -30,5 +30,5 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
-* Tue Nov 11 2014 Oswyn Brent <oswyn.brent@anchor.com.au> - 0.0.3-0.0anchor1
+* Tue Nov 11 2014 Oswyn Brent <oswyn.brent@anchor.com.au> - 0.0.3-0anchor1
 - Initial build
