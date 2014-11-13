@@ -36,6 +36,8 @@ class QueuePublisher(publisher.PublisherBase):
                                                                             credentials=credentials))
         self.channel = self.connection.channel()
         self.exchange = cfg.CONF.publisher_exchange
+        self.channel.exchange_declare(exchange=self.exchange,
+                                      type='fanout')
 
     def publish_samples(self, context, samples):
         """
