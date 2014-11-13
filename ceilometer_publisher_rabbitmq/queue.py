@@ -17,7 +17,10 @@ OPTS = [
                default='/'),
     cfg.StrOpt('publisher_exchange',
                default='publisher-exchange',
-               help='The exchange to use for publishing samples')
+               help='The exchange to use for publishing samples'),
+    cfg.StrOpt('publisher_queue',
+               default='publisher-queue',
+               help='The queue to use for publishing samples'),
 ]
 
 cfg.CONF.register_opts(OPTS)
@@ -27,15 +30,28 @@ class QueuePublisher(publisher.PublisherBase):
 
     def __init__(self, parsed_url):
         super(QueuePublisher, self).__init__(parsed_url)
-        credentials = pika.credentials.PlainCredentials(username = cfg.CONF.publisher_rabbit_user,
-                                                        password = cfg.CONF.publisher_rabbit_password,
-                                                        erase_on_connect = True)
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=cfg.CONF.publisher_rabbit_host,
-                                                                            port=cfg.CONF.publisher_rabbit_port,
-                                                                            virtual_host=cfg.CONF.publisher_rabbit_virtual_host,
-                                                                            credentials=credentials))
+        credentials = pika.credentials.PlainCredentials(
+            username = cfg.CONF.publisher_rabbit_user,
+            password = cfg.CONF.publisher_rabbit_password,
+            erase_on_connect = True,
+        )
+        self.connection = pika.BlockingConnection(
+            pika.ConnectionParameters(
+                host=cfg.CONF.publisher_rabbit_host,
+                port=cfg.CONF.publisher_rabbit_port,
+                virtual_host=cfg.CONF.publisher_rabbit_virtual_host,
+                credentials=credentials,
+            )
+        )
         self.channel = self.connection.channel()
         self.exchange = cfg.CONF.publisher_exchange
+        queue = cfg.CONF.publisher_queue
+        self.channel.exchange_declare(exchange=self.exchange,
+                                      type='fanout')
+        self.channel.queue_declare(queue=queue,
+                                   durable=True, auto_delete=False)
+        self.channel.queue_bind(queue=queue,
+                                exchange=self.exchange)
 
     def publish_samples(self, context, samples):
         """
