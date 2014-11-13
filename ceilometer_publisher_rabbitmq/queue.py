@@ -22,6 +22,24 @@ OPTS = [
 
 cfg.CONF.register_opts(OPTS)
 
+def logOkExchange(exchange):
+    """Callback on Exchange.DeclareOk"""
+    def writeLog():
+        LOG.info("Declared exchange %s" % exchange)
+    return writeLog
+
+def logOkQueue(queue):
+    """Callback on Queue.DeclareOk"""
+    def writeLog():
+        LOG.info("Declared queue %s" % queue)
+    return writeLog
+
+def logOkBind(exchange, queue):
+    """Callback on Queue.BindOk"""
+    def writeLog():
+        LOG.info("Queue %s bound to exchange %s" % (queue, exchange))
+    return writeLog
+
 class QueuePublisher(publisher.PublisherBase):
     """Republishes all received samples to a rabbit queue"""
 
@@ -36,8 +54,15 @@ class QueuePublisher(publisher.PublisherBase):
                                                                             credentials=credentials))
         self.channel = self.connection.channel()
         self.exchange = cfg.CONF.publisher_exchange
-        self.channel.exchange_declare(exchange=self.exchange,
+        queue = cfg.CONF.publisher_queue
+        self.channel.exchange_declare(logOkExchange(self.exchange),
+                                      exchange=self.exchange,
                                       type='fanout')
+        self.channel.queue_declare(logOkQueue(queue), queue=queue,
+                                   durable=True, auto_delete=False)
+        self.channel.queue_bind(logOkBind(self.exchange, queue),
+                                queue=queue,
+                                exchange=self.exchange)
 
     def publish_samples(self, context, samples):
         """
