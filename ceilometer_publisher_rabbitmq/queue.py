@@ -56,7 +56,8 @@ class QueuePublisher(publisher.PublisherBase):
         self.exchange = cfg.CONF.publisher_exchange
         queue = cfg.CONF.publisher_queue
         self.channel.exchange_declare(exchange=self.exchange,
-                                      type='fanout')
+                                      type='fanout',
+                                      durable=True)
         self.channel.queue_declare(queue=queue,
                                    durable=True, auto_delete=False)
         self.channel.queue_bind(queue=queue,
