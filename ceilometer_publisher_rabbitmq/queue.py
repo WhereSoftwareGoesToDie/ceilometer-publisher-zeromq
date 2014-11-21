@@ -30,6 +30,15 @@ class QueuePublisher(publisher.PublisherBase):
 
     def __init__(self, parsed_url):
         super(QueuePublisher, self).__init__(parsed_url)
+        self.connection = None
+        self.channel = None
+        self.exchange = None
+        self.reconnect()
+
+    def reconnect(self):
+        """(re)connects to the configured rabbit server"""
+        if self.connection is not None:
+            self.connection.close()
         credentials = pika.credentials.PlainCredentials(
             username = cfg.CONF.publisher_rabbit_user,
             password = cfg.CONF.publisher_rabbit_password,
@@ -53,6 +62,16 @@ class QueuePublisher(publisher.PublisherBase):
         self.channel.queue_bind(queue=queue,
                                 exchange=self.exchange)
 
+    def publish_sample(self, message):
+        """Attempt to publish a single sample"""
+        if not self.channel.basic_publish(exchange=self.exchange,
+                                          routing_key='',
+                                          body=message,
+                                          mandatory=True):
+            self.reconnect()
+            return False
+        return True
+
     def publish_samples(self, context, samples):
         """
         Converts each sample into a string of JSON and publishes it the setup rabbit queue
@@ -60,8 +79,5 @@ class QueuePublisher(publisher.PublisherBase):
         for sample in samples:
             LOG.debug("Queue Publisher got sample")
             message = json.dumps(sample.as_dict())
-            self.channel.basic_publish(exchange=self.exchange,
-                                       routing_key='',
-                                       body=message,
-                                       mandatory=True)
+            while not self.publish_sample(message): pass
             LOG.debug(_("Queue Publisher published %s to exchange %s") % (message, self.exchange))
