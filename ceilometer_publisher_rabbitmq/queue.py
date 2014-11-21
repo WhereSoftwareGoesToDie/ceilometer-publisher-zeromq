@@ -79,5 +79,6 @@ class QueuePublisher(publisher.PublisherBase):
         for sample in samples:
             LOG.debug("Queue Publisher got sample")
             message = json.dumps(sample.as_dict())
-            while not self.publish_sample(message): pass
+            while not self.publish_sample(message):
+                pass
             LOG.debug(_("Queue Publisher published %s to exchange %s") % (message, self.exchange))
