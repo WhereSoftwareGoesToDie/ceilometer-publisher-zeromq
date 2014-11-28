@@ -2,6 +2,7 @@ from ceilometer import publisher
 from ceilometer.openstack.common.gettextutils import _
 from ceilometer.openstack.common import log
 from oslo.config import cfg
+from time import sleep
 import json
 import pika
 
@@ -62,6 +63,7 @@ class QueuePublisher(publisher.PublisherBase):
                                    durable=True, auto_delete=False)
         self.channel.queue_bind(queue=queue,
                                 exchange=self.exchange)
+        self.channel.confirm_delivery()
 
     def publish_sample(self, message):
         """Attempt to publish a single sample"""
@@ -81,5 +83,6 @@ class QueuePublisher(publisher.PublisherBase):
             LOG.debug("Queue Publisher got sample")
             message = json.dumps(sample.as_dict())
             while not self.publish_sample(message):
-                pass
+                LOG.warning("Failed to publish message, sleeping 5 seconds then reconnecting")
+                sleep(5)
             LOG.debug(_("Queue Publisher published %s to exchange %s") % (message, self.exchange))
