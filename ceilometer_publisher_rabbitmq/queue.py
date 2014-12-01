@@ -2,8 +2,10 @@ from ceilometer import publisher
 from ceilometer.openstack.common.gettextutils import _
 from ceilometer.openstack.common import log
 from oslo.config import cfg
+from time import sleep
 import json
 import pika
+from pika.exceptions import ConnectionClosed
 
 LOG = log.getLogger(__name__)
 
@@ -30,6 +32,13 @@ class QueuePublisher(publisher.PublisherBase):
 
     def __init__(self, parsed_url):
         super(QueuePublisher, self).__init__(parsed_url)
+        self.connection = None
+        self.channel = None
+        self.exchange = None
+        self.reconnect()
+
+    def reconnect(self):
+        """(re)connects to the configured rabbit server"""
         credentials = pika.credentials.PlainCredentials(
             username = cfg.CONF.publisher_rabbit_user,
             password = cfg.CONF.publisher_rabbit_password,
@@ -47,11 +56,25 @@ class QueuePublisher(publisher.PublisherBase):
         self.exchange = cfg.CONF.publisher_exchange
         queue = cfg.CONF.publisher_queue
         self.channel.exchange_declare(exchange=self.exchange,
-                                      type='fanout')
+                                      type='fanout',
+                                      durable=True)
         self.channel.queue_declare(queue=queue,
                                    durable=True, auto_delete=False)
         self.channel.queue_bind(queue=queue,
                                 exchange=self.exchange)
+        self.channel.confirm_delivery()
+
+    def publish_sample(self, message):
+        """Attempt to publish a single sample"""
+        try:
+            self.channel.basic_publish(exchange=self.exchange,
+                                       routing_key='',
+                                       body=message,
+                                       mandatory=True)
+        except ConnectionClosed as e:
+            LOG.info("Caught %s, reconnecting.", e)
+            return False
+        return True
 
     def publish_samples(self, context, samples):
         """
@@ -60,8 +83,8 @@ class QueuePublisher(publisher.PublisherBase):
         for sample in samples:
             LOG.debug("Queue Publisher got sample")
             message = json.dumps(sample.as_dict())
-            self.channel.basic_publish(exchange=self.exchange,
-                                       routing_key='',
-                                       body=message,
-                                       mandatory=True)
+            while not self.publish_sample(message):
+                LOG.warning("Failed to publish message, sleeping 3 seconds then reconnecting")
+                sleep(3)
+                self.reconnect()
             LOG.debug(_("Queue Publisher published %s to exchange %s") % (message, self.exchange))

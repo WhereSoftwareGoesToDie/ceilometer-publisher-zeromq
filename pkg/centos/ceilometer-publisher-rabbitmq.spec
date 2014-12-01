@@ -1,5 +1,5 @@
 Name:           ceilometer-publisher-rabbitmq
-Version:        0.0.3
+Version:        0.0.5
 Release:        0anchor1%{?dist}
 Group:          Development/Libraries
 Summary:        A publisher plugin for Ceilometer that outputs to RabbitMQ
@@ -30,5 +30,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+
+* Mon Dec 01 2014 Oswyn Brent <oswyn.brent@anchor.com.au> - 0.0.5-0anchor1
+- Reconnect on disconnect
+
 * Tue Nov 11 2014 Oswyn Brent <oswyn.brent@anchor.com.au> - 0.0.3-0anchor1
 - Initial build
