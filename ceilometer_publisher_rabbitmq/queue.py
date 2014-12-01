@@ -5,6 +5,7 @@ from oslo.config import cfg
 from time import sleep
 import json
 import pika
+from pika.exceptions import ConnectionClosed
 
 LOG = log.getLogger(__name__)
 
@@ -38,8 +39,6 @@ class QueuePublisher(publisher.PublisherBase):
 
     def reconnect(self):
         """(re)connects to the configured rabbit server"""
-        if self.connection is not None:
-            self.connection.close()
         credentials = pika.credentials.PlainCredentials(
             username = cfg.CONF.publisher_rabbit_user,
             password = cfg.CONF.publisher_rabbit_password,
@@ -67,11 +66,13 @@ class QueuePublisher(publisher.PublisherBase):
 
     def publish_sample(self, message):
         """Attempt to publish a single sample"""
-        if not self.channel.basic_publish(exchange=self.exchange,
-                                          routing_key='',
-                                          body=message,
-                                          mandatory=True):
-            self.reconnect()
+        try:
+            self.channel.basic_publish(exchange=self.exchange,
+                                       routing_key='',
+                                       body=message,
+                                       mandatory=True)
+        except ConnectionClosed as e:
+            LOG.info("Caught %s, reconnecting.", e)
             return False
         return True
 
@@ -83,6 +84,7 @@ class QueuePublisher(publisher.PublisherBase):
             LOG.debug("Queue Publisher got sample")
             message = json.dumps(sample.as_dict())
             while not self.publish_sample(message):
-                LOG.warning("Failed to publish message, sleeping 5 seconds then reconnecting")
-                sleep(5)
+                LOG.warning("Failed to publish message, sleeping 3 seconds then reconnecting")
+                sleep(3)
+                self.reconnect()
             LOG.debug(_("Queue Publisher published %s to exchange %s") % (message, self.exchange))
