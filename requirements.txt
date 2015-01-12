@@ -1,2 +1,2 @@
 ceilometer
-pika
+kombu
