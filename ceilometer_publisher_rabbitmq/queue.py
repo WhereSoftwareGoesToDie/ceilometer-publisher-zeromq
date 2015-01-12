@@ -4,8 +4,7 @@ from ceilometer.openstack.common import log
 from oslo.config import cfg
 from time import sleep
 import json
-import pika
-from pika.exceptions import ConnectionClosed
+import kombu
 
 LOG = log.getLogger(__name__)
 
@@ -39,42 +38,40 @@ class QueuePublisher(publisher.PublisherBase):
 
     def reconnect(self):
         """(re)connects to the configured rabbit server"""
-        credentials = pika.credentials.PlainCredentials(
-            username = cfg.CONF.publisher_rabbit_user,
-            password = cfg.CONF.publisher_rabbit_password,
-            erase_on_connect = True,
+        self.connection = kombu.Connection(
+            hostname     = 'amqp://'+cfg.CONF.publisher_rabbit_host,
+            userid       = cfg.CONF.publisher_rabbit_user,
+            password     = cfg.CONF.publisher_rabbit_password,
+            virtual_host = cfg.CONF.publisher_rabbit_virtual_host,
+            port         = cfg.CONF.publisher_rabbit_port,
         )
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(
-                host=cfg.CONF.publisher_rabbit_host,
-                port=cfg.CONF.publisher_rabbit_port,
-                virtual_host=cfg.CONF.publisher_rabbit_virtual_host,
-                credentials=credentials,
-            )
+        self.channel = kombu.transport.pyamqp.Channel(self.connection)
+        self.exchange = kombu.Exchange(
+            name        = cfg.CONF.publisher_exchange,
+            type        = 'fanout',
+            channel     = self.channel,
+            durable     = True,
+            auto_delete = False,
         )
-        self.channel = self.connection.channel()
-        self.exchange = cfg.CONF.publisher_exchange
-        queue = cfg.CONF.publisher_queue
-        self.channel.exchange_declare(exchange=self.exchange,
-                                      type='fanout',
-                                      durable=True)
-        self.channel.queue_declare(queue=queue,
-                                   durable=True, auto_delete=False)
-        self.channel.queue_bind(queue=queue,
-                                exchange=self.exchange)
-        self.channel.confirm_delivery()
+        self.exchange.declare()
+
+        queue = kombu.Queue(
+            name = cfg.CONF.publisher_queue,
+            exchange = self.exchange,
+        )
+        queue.declare()
 
     def publish_sample(self, message):
         """Attempt to publish a single sample"""
-        try:
-            self.channel.basic_publish(exchange=self.exchange,
-                                       routing_key='',
-                                       body=message,
-                                       mandatory=True)
-        except ConnectionClosed as e:
-            LOG.info("Caught %s, reconnecting.", e)
+        if self.connection.connected:
+            self.exchange.publish(
+                message = self.exchange.Message(message),
+                routing_key='',
+            )
+            return True
+        else:
+            LOG.info("Tried publishing while disconnected, reconnecting.")
             return False
-        return True
 
     def publish_samples(self, context, samples):
         """
