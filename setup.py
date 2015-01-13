@@ -1,4 +1,5 @@
 import os
+import uuid
 from setuptools import setup
 from pip.req import parse_requirements
 
@@ -35,6 +36,6 @@ setup(
             "rabbitmq = ceilometer_publisher_rabbitmq.queue:QueuePublisher",
         ],
     },
-    install_requires=[str(req.req) for req in parse_requirements("requirements.txt")],
+    install_requires=[str(req.req) for req in parse_requirements("requirements.txt", session=uuid.uuid1())],
     include_package_data=True
 )
