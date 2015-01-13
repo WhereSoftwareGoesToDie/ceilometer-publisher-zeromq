@@ -1,6 +1,6 @@
 Name:           ceilometer-publisher-rabbitmq
 Version:        0.0.5
-Release:        0anchor1%{?dist}
+Release:        0anchor2%{?dist}
 Group:          Development/Libraries
 Summary:        A publisher plugin for Ceilometer that outputs to RabbitMQ
 License:        Apache
@@ -10,6 +10,7 @@ Source0:        %{name}-%{version}.tar.gz
 BuildRequires:  python
 BuildRequires:  python-setuptools
 BuildRequires:  python-pip
+Requires:       python-pika
 
 %description
 A publisher plugin for Ceilometer that outputs to RabbitMQ.
@@ -30,6 +31,10 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+
+* Tue Jan 06 2015 Barney Desmond <barney.desmond@anchor.net.au> - 0.0.5-0anchor2
+- Add some install notes
+- Fix runtime dependency
 
 * Mon Dec 01 2014 Oswyn Brent <oswyn.brent@anchor.com.au> - 0.0.5-0anchor1
 - Reconnect on disconnect
