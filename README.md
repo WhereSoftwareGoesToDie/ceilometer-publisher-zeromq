@@ -38,7 +38,7 @@ Installation + Deployment
     python setup.py install
     ```
 
-2. Add "rabbitmq://" to the publishers in your `pipeline.yaml`.
+2. Add *rabbitmq://* to the publishers in your `pipeline.yaml`.
    (This is by default in `/etc/ceilometer/`)
 
    Example `pipeline.yaml`:
