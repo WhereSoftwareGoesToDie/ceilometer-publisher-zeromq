@@ -26,3 +26,43 @@ Data flow
 5. Reader process reads from the RabbitMQ exchange, performs any necessary
    processing, then writes the output to a spoolfile via libmarquise
 6. Spoolfiles are read and shipped to Vaultaire by a marquised process.
+
+
+Installation + Deployment
+-------------------------
+
+1. Install from source. (git clone -> python setup.py install)
+2. Add "rabbitmq://" to the publishers in your pipeline.yaml.
+   (This is by default in /etc/ceilometer/)
+
+   Example pipeline.yaml:
+
+    ```
+    sources:
+        - name: meter_source
+          interval: 42
+          meters:
+              - "*"
+          sinks:
+              - meter_sink
+    sinks:
+        - name: meter_sink
+          transformers:
+          publishers:
+              - rabbitmq://
+    ```
+
+3. Add the credentials + options you require to your ceilometer.conf
+   (This also in /etc/ceilometer/ by default).
+
+   Example ceilometer.conf:
+    ```
+    [DEFAULT]
+    publisher_exchange = "publisher-exchange"
+    publisher_queue = "publisher-queue"
+    publisher_rabbit_user = guest
+    publisher_rabbit_password = guest
+    publisher_rabbit_host = 127.0.0.1
+    ```
+
+4. Restart the central ceilometer agent (ceilometer-acentral)
