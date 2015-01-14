@@ -31,11 +31,17 @@ Data flow
 Installation + Deployment
 -------------------------
 
-1. Install from source. (git clone -> python setup.py install)
-2. Add "rabbitmq://" to the publishers in your pipeline.yaml.
-   (This is by default in /etc/ceilometer/)
+1. Install from source.
+    ```
+    git clone git@github.com:anchor/ceilometer-publisher-rabbitmq.git
+    cd ceilometer-publisher-rabbitmq
+    python setup.py install
+    ```
 
-   Example pipeline.yaml:
+2. Add "rabbitmq://" to the publishers in your `pipeline.yaml`.
+   (This is by default in `/etc/ceilometer/`)
+
+   Example `pipeline.yaml`:
 
     ```
     sources:
@@ -52,10 +58,11 @@ Installation + Deployment
               - rabbitmq://
     ```
 
-3. Add the credentials + options you require to your ceilometer.conf
-   (This also in /etc/ceilometer/ by default).
+3. Add the credentials + options you require to your `ceilometer.conf`
+   (This also in `/etc/ceilometer/` by default).
 
-   Example ceilometer.conf:
+   Partial example `ceilometer.conf`:
+
     ```
     [DEFAULT]
     publisher_exchange = "publisher-exchange"
@@ -65,4 +72,4 @@ Installation + Deployment
     publisher_rabbit_host = 127.0.0.1
     ```
 
-4. Restart the central ceilometer agent (ceilometer-acentral)
+4. Restart the central ceilometer agent (`ceilometer-acentral`)
