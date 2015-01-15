@@ -12,10 +12,13 @@ script:
   - sudo apt-get install rabbitmq-server
   - sudo apt-get install python-pip
   - sudo pip install -r requirements.txt
+  - cd ..
   - git clone https://github.com/openstack/ceilometer.git
   - cd ceilometer
   - sudo pip install -r requirements.txt
   - sudo python setup.py install
-  - cd ..
+  - cd ../ceilometer-publisher-rabbitmq
   - python test_integration.py
-  - "[ $(rabbitmqctl list_queues -q) != \"publisher-test-queue	1\" ]"
+  - output=$("rabbitmqctl list_queues -q")
+  - expected="publisher-test-queue	1"
+  - [ $output != $expected ]
