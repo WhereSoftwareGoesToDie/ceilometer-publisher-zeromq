@@ -1,6 +1,7 @@
 from ceilometer import publisher
+from ceilometer.openstack.common.gettextutils import _
 from ceilometer.openstack.common import log
-from oslo_config import cfg
+from oslo.config import cfg
 from time import sleep
 import json
 import pika
@@ -86,4 +87,4 @@ class QueuePublisher(publisher.PublisherBase):
                 LOG.warning("Failed to publish message, sleeping 3 seconds then reconnecting")
                 sleep(3)
                 self.reconnect()
-            LOG.debug(("Queue Publisher published %s to exchange %s") % (message, self.exchange))
+            LOG.debug(_("Queue Publisher published %s to exchange %s") % (message, self.exchange))
