@@ -1,4 +1,4 @@
-from ceilometer import publisher, sample
+from ceilometer import sample
 from ceilometer_publisher_rabbitmq import queue
 from pprint import pprint
 from urlparse import SplitResult
