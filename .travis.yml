@@ -6,13 +6,8 @@ python:
 
 # command to run tests
 script:
-  - sudo apt-get install rabbitmq-server
-  - sudo apt-get install python-pip
-  - sudo pip install -r requirements.txt
-  - cd ..
-  - git clone https://github.com/openstack/ceilometer.git
-  - cd ceilometer
-  - sudo pip install -r requirements.txt
-  - sudo python setup.py install --prefix='~/virtualenv'
-  - cd ../ceilometer-publisher-rabbitmq
+  - git clone https://github.com/openstack/ceilometer.git ../ceilometer
+  - pip install -r requirements.txt
+  - pip install -r ../ceilometer/requirements.txt
+  - pip install ../ceilometer
   - python test_integration.py
