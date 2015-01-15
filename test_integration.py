@@ -57,8 +57,6 @@ def main(argv=None):
         )
     )
     channel = connection.channel()
-    #Purge the queue"
-    channel.queue_purge(queue=options.publisher_queue)
     #Use the publihser to publish a single message
     queue.QueuePublisher(
         SplitResult(scheme='rabbitmq', netloc='', path='', query='', fragment='')
