@@ -4,9 +4,10 @@ python:
   - 2.7
   - 2.6
 
-# command to run tests
+services:
+      - rabbitmq
+
 script:
-  - invoke-rc.d rabbitmq-server restart
   - git clone https://github.com/openstack/ceilometer.git ../ceilometer
   - cd ../ceilometer
   - git checkout stable/juno
