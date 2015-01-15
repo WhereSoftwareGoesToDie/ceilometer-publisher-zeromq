@@ -1,9 +1,6 @@
 language: python
 
 python:
-  - 3.4
-  - 3.3
-  - 3.2
   - 2.7
   - 2.6
 
@@ -16,9 +13,6 @@ script:
   - git clone https://github.com/openstack/ceilometer.git
   - cd ceilometer
   - sudo pip install -r requirements.txt
-  - sudo python setup.py install
+  - sudo python setup.py install --prefix='~/virtualenv'
   - cd ../ceilometer-publisher-rabbitmq
   - python test_integration.py
-  - output=$("rabbitmqctl list_queues -q")
-  - expected="publisher-test-queue	1"
-  - [ $output != $expected ]
