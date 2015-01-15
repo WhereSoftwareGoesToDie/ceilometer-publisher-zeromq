@@ -6,6 +6,7 @@ python:
 
 # command to run tests
 script:
+  - sudo systemctl restart rabbitmq-server
   - git clone https://github.com/openstack/ceilometer.git ../ceilometer
   - cd ../ceilometer
   - git checkout stable/juno
