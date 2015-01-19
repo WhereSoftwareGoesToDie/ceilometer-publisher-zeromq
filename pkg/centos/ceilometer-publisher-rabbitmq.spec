@@ -1,5 +1,5 @@
 Name:           ceilometer-publisher-rabbitmq
-Version:        0.0.6
+Version:        0.0.7
 Release:        0anchor1%{?dist}
 Group:          Development/Libraries
 Summary:        A publisher plugin for Ceilometer that outputs to RabbitMQ
@@ -31,6 +31,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+
+* Mon Jan 19 2015 Oswyn Brent <oswyn.brent@anchor.net.au> - 0.0.7-0anchor1
+- Rewrite using kombu over pika
 
 * Tue Jan 13 2015 Barney Desmond <barney.desmond@anchor.net.au> - 0.0.6-0anchor1
 - Set explicit python-pika version requirement to avoid problems with 0.9.14
