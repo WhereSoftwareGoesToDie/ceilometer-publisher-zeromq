@@ -39,11 +39,14 @@ class QueuePublisher(publisher.PublisherBase):
     def reconnect(self):
         """(re)connects to the configured rabbit server"""
         self.connection = kombu.Connection(
-            hostname     = cfg.CONF.publisher_rabbit_host,
-            userid       = cfg.CONF.publisher_rabbit_user,
-            password     = cfg.CONF.publisher_rabbit_password,
-            virtual_host = cfg.CONF.publisher_rabbit_virtual_host,
-            port         = cfg.CONF.publisher_rabbit_port,
+            hostname          = cfg.CONF.publisher_rabbit_host,
+            userid            = cfg.CONF.publisher_rabbit_user,
+            password          = cfg.CONF.publisher_rabbit_password,
+            virtual_host      = cfg.CONF.publisher_rabbit_virtual_host,
+            port              = cfg.CONF.publisher_rabbit_port,
+            transport_options = {
+                'confirm_publish' : True,
+            },
         )
         self.connection.connect()
         self.channel = self.connection.channel()
