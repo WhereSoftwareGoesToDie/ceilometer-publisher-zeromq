@@ -10,7 +10,7 @@ Source0:        %{name}-%{version}.tar.gz
 BuildRequires:  python
 BuildRequires:  python-setuptools
 BuildRequires:  python-pip
-Requires:       python-pika <= 0.9.13
+Requires:       python-kombu
 
 %description
 A publisher plugin for Ceilometer that outputs to RabbitMQ.
