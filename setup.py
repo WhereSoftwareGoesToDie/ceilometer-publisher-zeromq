@@ -1,4 +1,5 @@
 import os
+import uuid
 from setuptools import setup
 from pip.req import parse_requirements
 
@@ -11,7 +12,7 @@ def read(fname):
 
 setup(
     name="ceilometer-publisher-rabbitmq",
-    version="0.0.5",
+    version="0.0.6",
     description="A publisher plugin for Ceilometer that outputs to RabbitMQ",
     author="Oswyn Brent",
     author_email="oswyn.brent@anchor.com.au",
@@ -35,6 +36,6 @@ setup(
             "rabbitmq = ceilometer_publisher_rabbitmq.queue:QueuePublisher",
         ],
     },
-    install_requires=[str(req.req) for req in parse_requirements("requirements.txt")],
+    install_requires=[str(req.req) for req in parse_requirements("requirements.txt", session=uuid.uuid1())],
     include_package_data=True
 )
