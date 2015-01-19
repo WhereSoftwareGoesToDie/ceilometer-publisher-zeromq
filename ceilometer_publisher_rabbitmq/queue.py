@@ -39,13 +39,14 @@ class QueuePublisher(publisher.PublisherBase):
     def reconnect(self):
         """(re)connects to the configured rabbit server"""
         self.connection = kombu.Connection(
-            hostname     = 'amqp://'+cfg.CONF.publisher_rabbit_host,
+            hostname     = +cfg.CONF.publisher_rabbit_host,
             userid       = cfg.CONF.publisher_rabbit_user,
             password     = cfg.CONF.publisher_rabbit_password,
             virtual_host = cfg.CONF.publisher_rabbit_virtual_host,
             port         = cfg.CONF.publisher_rabbit_port,
         )
-        self.channel = kombu.transport.pyamqp.Channel(self.connection)
+        self.connection.connect()
+        self.channel = self.connection.channel()
         self.exchange = kombu.Exchange(
             name        = cfg.CONF.publisher_exchange,
             type        = 'fanout',
@@ -56,8 +57,9 @@ class QueuePublisher(publisher.PublisherBase):
         self.exchange.declare()
 
         queue = kombu.Queue(
-            name = cfg.CONF.publisher_queue,
+            name     = cfg.CONF.publisher_queue,
             exchange = self.exchange,
+            channel  = self.channel,
         )
         queue.declare()
 
