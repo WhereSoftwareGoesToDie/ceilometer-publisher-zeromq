@@ -2,7 +2,7 @@ from ceilometer import sample
 from ceilometer_publisher_rabbitmq import queue
 from urlparse import SplitResult
 import json
-import pika
+import kombu
 import sys
 
 def stub_sample():
@@ -43,34 +43,29 @@ def main(argv=None):
     options.publisher_exchange='publisher-test-exchange'
     options.publisher_queue='publisher-test-queue'
     #Setup connection
-    credentials = pika.credentials.PlainCredentials(
-        username = options.publisher_rabbit_user,
-        password = options.publisher_rabbit_password,
-        erase_on_connect = True,
+    connection = kombu.Connection(
+        hostname     = options.publisher_rabbit_host,
+        userid       = options.publisher_rabbit_user,
+        password     = options.publisher_rabbit_password,
+        virtual_host = options.publisher_rabbit_virtual_host,
+        port         = options.publisher_rabbit_port,
     )
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(
-            host=options.publisher_rabbit_host,
-            port=options.publisher_rabbit_port,
-            virtual_host=options.publisher_rabbit_virtual_host,
-            credentials=credentials,
-        )
-    )
-    channel = connection.channel()
+    connection.connect()
     #Use the publihser to publish a single message
     queue.QueuePublisher(
         SplitResult(scheme='rabbitmq', netloc='', path='', query='', fragment='')
     ).publish_samples(None, [stub_sample()])
     #Grab and check the message is as we expect
-    method_frame, _, body = channel.basic_get(queue=options.publisher_queue)
-    if method_frame:
-        channel.basic_ack(method_frame.delivery_tag)
-        cleaned = json.loads(body)
+    test_queue = connection.SimpleQueue(options.publisher_queue)
+    message = test_queue.get(block=True, timeout=1)
+    if message:
+        message.ack()
+        cleaned = json.loads(message.payload)
         cleaned.pop('id', None)
+        test_queue.close()
         assert cleaned == stub_expected()
     else:
         print 'No messaged returned'
         sys.exit(1)
-
 if __name__ == '__main__':
     sys.exit(main())
