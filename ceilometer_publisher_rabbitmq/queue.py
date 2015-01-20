@@ -69,10 +69,14 @@ class QueuePublisher(publisher.PublisherBase):
     def publish_sample(self, message):
         """Attempt to publish a single sample"""
         if self.connection.connected:
-            self.exchange.publish(
-                message = self.exchange.Message(message),
-                routing_key='',
-            )
+            try:
+                self.exchange.publish(
+                    message = self.exchange.Message(message),
+                    routing_key='',
+                )
+            except Exception as e:
+                LOG.error("Error publishing sample: " + str(e))
+                return False
             return True
         else:
             LOG.info("Tried publishing while disconnected, reconnecting.")
