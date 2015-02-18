@@ -45,7 +45,7 @@ class QueuePublisher(publisher.PublisherBase):
             virtual_host      = cfg.CONF.publisher_rabbit_virtual_host,
             port              = cfg.CONF.publisher_rabbit_port,
             transport_options = {
-                'confirm_publish' : True,
+                'confirm_publish' : False,
             },
         )
         self.connection.connect()
