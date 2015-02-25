@@ -11,19 +11,19 @@ def read(fname):
         return f.read()
 
 setup(
-    name="ceilometer-publisher-rabbitmq",
-    version="0.0.7",
-    description="A publisher plugin for Ceilometer that outputs to RabbitMQ",
+    name="ceilometer-publisher-zeromq",
+    version="0.0.1",
+    description="A publisher plugin for Ceilometer that outputs to a collector via ZeroMQ",
     author="Oswyn Brent",
     author_email="oswyn.brent@anchor.com.au",
     maintainer_email="engineering@anchor.net.au",
-    url="https://github.com/anchor/ceilometer-publisher-rabbitmq",
+    url="https://github.com/anchor/ceilometer-publisher-zeromq",
     zip_safe=False,
     packages=[
-        "ceilometer_publisher_rabbitmq",
+        "ceilometer_publisher_zeromq",
     ],
     package_data={
-        "ceilometer_publisher_rabbitmq" : ["README.md"],
+        "ceilometer_publisher_zeromq" : ["README.md"],
     },
     long_description=read("README"),
     classifiers=[
@@ -33,7 +33,7 @@ setup(
     ],
     entry_points = {
         "ceilometer.publisher": [
-            "rabbitmq = ceilometer_publisher_rabbitmq.queue:QueuePublisher",
+            "zeromq = ceilometer_publisher_zeromq.queue:QueuePublisher",
         ],
     },
     install_requires=[str(req.req) for req in parse_requirements("requirements.txt", session=uuid.uuid1())],
