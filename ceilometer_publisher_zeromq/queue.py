@@ -9,7 +9,7 @@ LOG = log.getLogger(__name__)
 
 OPTS = [
     cfg.StrOpt('publisher_zeromq_host',
-               default='127.0.0.1'),
+               default='localhost'),
     cfg.IntOpt('publisher_zeromq_port',
                default=8282),
 ]

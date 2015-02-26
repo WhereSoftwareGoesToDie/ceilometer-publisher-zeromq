@@ -20,7 +20,7 @@ Data flow
 
 1. Openstack produces a JSON message blob
 2. Enters the Ceilometer pipeline via a ceilometer agent
-3. ceilometer-publisher-zeromq sends the JSON to a collector
+3. ceilometer-publisher-zeromq sends the JSON to a collector over a ZeroMQ Connection
 4. vaultaire-collector-ceilometer performs any necessary processing,
    then writes the output to a spoolfile via marquise
 5. Spoolfiles are read and shipped to Vaultaire by a marquised process.
