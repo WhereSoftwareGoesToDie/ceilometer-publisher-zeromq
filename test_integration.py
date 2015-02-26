@@ -1,9 +1,9 @@
 from ceilometer import sample
-from ceilometer_publisher_rabbitmq import queue
+from ceilometer_publisher_zeromq import queue
 from urlparse import SplitResult
-import json
-import kombu
+import os
 import sys
+import zmq
 
 def stub_sample():
     return sample.Sample(
@@ -35,38 +35,23 @@ def stub_expected():
     }
 
 def main(argv=None):
-    #Overwrite options
-    options=queue.cfg.CONF
-    options.publisher_rabbit_host='localhost'
-    options.publisher_rabbit_user='guest'
-    options.publisher_rabbit_password='guest'
-    options.publisher_exchange='publisher-test-exchange'
-    options.publisher_queue='publisher-test-queue'
     #Setup connection
-    connection = kombu.Connection(
-        hostname     = options.publisher_rabbit_host,
-        userid       = options.publisher_rabbit_user,
-        password     = options.publisher_rabbit_password,
-        virtual_host = options.publisher_rabbit_virtual_host,
-        port         = options.publisher_rabbit_port,
-    )
-    connection.connect()
+    context = zmq.Context()
+    socket  = context.socket(zmq.REP)
+    socket.bind("tcp://127.0.0.1:8282")
     #Use the publihser to publish a single message
-    queue.QueuePublisher(
-        SplitResult(scheme='rabbitmq', netloc='', path='', query='', fragment='')
-    ).publish_samples(None, [stub_sample()])
-    #Grab and check the message is as we expect
-    test_queue = connection.SimpleQueue(options.publisher_queue)
-    message = test_queue.get(block=True, timeout=1)
-    if message:
-        message.ack()
-        cleaned = json.loads(message.payload)
-        cleaned.pop('id', None)
-        test_queue.close()
-        assert cleaned == stub_expected()
+    new_pid = os.fork()
+    if new_pid == 0:
+        queue.QueuePublisher(
+            SplitResult(scheme = 'rabbitmq', netloc='', path='', query='', fragment='')
+        ).publish_samples(None, [stub_sample()])
+        os._exit(0)
     else:
-        print 'No messaged returned'
-        sys.exit(1)
+        #Grab and check the message is as we expect
+        a = socket.recv_json()
+        socket.send("")
+        a.pop('id', None)
+        assert a == stub_expected()
 
 if __name__ == '__main__':
     sys.exit(main())
