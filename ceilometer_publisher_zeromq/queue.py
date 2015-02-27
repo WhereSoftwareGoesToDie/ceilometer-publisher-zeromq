@@ -28,6 +28,7 @@ class QueuePublisher(publisher.PublisherBase):
 
     def reconnect(self):
         """Terminates existing context then reconnects to the collector"""
+        self.socket.close()
         self.context.term()
         self.connect()
 
