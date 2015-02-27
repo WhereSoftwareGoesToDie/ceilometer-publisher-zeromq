@@ -24,10 +24,15 @@ class QueuePublisher(publisher.PublisherBase):
         super(QueuePublisher, self).__init__(parsed_url)
         self.context = None
         self.socket  = None
-        self.reconnect()
+        self.connect()
 
     def reconnect(self):
-        """(re)connects to the collector"""
+        """Terminates existing context then reconnects to the collector"""
+        self.context.term()
+        self.connect()
+
+    def connect(self):
+        """connects to the collector"""
         self.context = zmq.Context()
         self.socket  = self.context.socket(zmq.REQ)
         self.socket.connect("tcp://%s:%d" % (cfg.CONF.publisher_zeromq_host, cfg.CONF.publisher_zeromq_port))
