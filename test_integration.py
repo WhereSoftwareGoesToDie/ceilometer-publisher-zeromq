@@ -39,11 +39,11 @@ def main(argv=None):
     context = zmq.Context()
     socket  = context.socket(zmq.REP)
     socket.bind("tcp://127.0.0.1:8282")
-    #Use the publihser to publish a single message
+    #Use the publisher to publish a single message
     new_pid = os.fork()
     if new_pid == 0:
         queue.QueuePublisher(
-            SplitResult(scheme = 'rabbitmq', netloc='', path='', query='', fragment='')
+            SplitResult(scheme = 'tcp', netloc='', path='', query='', fragment='')
         ).publish_samples(None, [stub_sample()])
         os._exit(0)
     else:
