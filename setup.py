@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name="ceilometer-publisher-zeromq",
-    version="0.0.1",
+    version="0.0.2",
     description="A publisher plugin for Ceilometer that outputs to a collector via ZeroMQ",
     author="Oswyn Brent",
     author_email="oswyn.brent@anchor.com.au",
@@ -33,7 +33,7 @@ setup(
     ],
     entry_points = {
         "ceilometer.publisher": [
-            "zeromq = ceilometer_publisher_zeromq.queue:QueuePublisher",
+            "zeromq = ceilometer_publisher_zeromq.queue:ZeroMQPublisher",
         ],
     },
     install_requires=[str(req.req) for req in parse_requirements("requirements.txt", session=uuid.uuid1())],

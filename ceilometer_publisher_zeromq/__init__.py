@@ -2,4 +2,4 @@
 
 from ceilometer_publisher_zeromq.queue import *
 
-__all__ = ['QueuePublisher']
+__all__ = ['ZeroMQPublisher']
