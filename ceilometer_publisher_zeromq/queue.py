@@ -16,12 +16,12 @@ OPTS = [
 
 cfg.CONF.register_opts(OPTS)
 
-class QueuePublisher(publisher.PublisherBase):
+class ZeroMQPublisher(publisher.PublisherBase):
     """Republishes all received samples to a collector via ZeroMQ"""
 
     def __init__(self, parsed_url):
-        LOG.info("Queue Publisher starting up")
-        super(QueuePublisher, self).__init__(parsed_url)
+        LOG.info("ZeroMQ publisher starting up")
+        super(ZeroMQPublisher, self).__init__(parsed_url)
         self.context = None
         self.socket  = None
         self.connect()
@@ -53,9 +53,9 @@ class QueuePublisher(publisher.PublisherBase):
         Converts each sample into a string of JSON and publishes it the setup rabbit queue
         """
         for sample in samples:
-            LOG.debug("Queue Publisher got sample")
+            LOG.debug("ZeroMQ publisher got sample")
             message = json.dumps(sample.as_dict())
             while not self.publish_sample(message):
                 LOG.warning("Failed to publish message reconnecting")
                 self.reconnect()
-            LOG.debug(_("Queue Publisher published %s") % message)
+            LOG.debug(_("ZeroMQ publisher published %s") % message)
