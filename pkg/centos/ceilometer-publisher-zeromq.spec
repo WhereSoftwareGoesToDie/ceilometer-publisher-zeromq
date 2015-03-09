@@ -1,5 +1,5 @@
 Name:           ceilometer-publisher-zeromq
-Version:        0.0.2
+Version:        0.0.3
 Release:        0anchor1%{?dist}
 Group:          Development/Libraries
 Summary:        A publisher plugin for Ceilometer that outputs to a collector via ZeroMQ
@@ -32,8 +32,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Mon Mar 09 2015 Oswyn Brent <oswyn.brent@anchor.com.au> - 0.0.3-0anchor1
+- Publisher now uses an internal buffer to avoid race conditions
+
 * Tue Mar 03 2015 Sharif Olorin <sio@tesser.org> - 0.0.2-0anchor1
-- Initial build
+- Renamed publisher with distinct name from old publisher
 
 * Wed Feb 25 2015 Oswyn Brent <oswyn.brent@anchor.com.au> - 0.0.1-0anchor1
 - Initial build

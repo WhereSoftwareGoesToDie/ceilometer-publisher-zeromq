@@ -4,6 +4,7 @@ from ceilometer.openstack.common import log
 from oslo.config import cfg
 import json
 import zmq
+from Queue import Queue, Empty
 
 LOG = log.getLogger(__name__)
 
@@ -24,6 +25,7 @@ class ZeroMQPublisher(publisher.PublisherBase):
         super(ZeroMQPublisher, self).__init__(parsed_url)
         self.context = None
         self.socket  = None
+        self.queue = Queue()
         self.connect()
 
     def reconnect(self):
@@ -38,15 +40,23 @@ class ZeroMQPublisher(publisher.PublisherBase):
         self.socket  = self.context.socket(zmq.REQ)
         self.socket.connect("tcp://%s:%d" % (cfg.CONF.publisher_zeromq_host, cfg.CONF.publisher_zeromq_port))
 
-    def publish_sample(self, message):
+    def publish_everything(self):
         """Attempt to publish a single sample"""
-        self.socket.send(message)
-        events = self.socket.poll(1000)
-        if events == 0:
-            return False
-        else:
-            self.socket.recv()
-            return True
+        while not self.queue.empty():
+            try:
+                message = self.queue.get(block=False)
+                self.socket.send(message)
+                events = self.socket.poll(1000)
+                if events == 0:
+                    self.queue.put(message)
+                    LOG.debug("Publisher failed to publish %s, reconnecting" % message)
+                    self.reconnect()
+                else:
+                    self.socket.recv()
+                    LOG.debug("Publisher successfully published %s" % message)
+            except Empty:
+                #Queue is empty, publishing is finished
+                pass
 
     def publish_samples(self, context, samples):
         """
@@ -55,7 +65,6 @@ class ZeroMQPublisher(publisher.PublisherBase):
         for sample in samples:
             LOG.debug("ZeroMQ publisher got sample")
             message = json.dumps(sample.as_dict())
-            while not self.publish_sample(message):
-                LOG.warning("Failed to publish message reconnecting")
-                self.reconnect()
-            LOG.debug(_("ZeroMQ publisher published %s") % message)
+            self.queue.put(message)
+            LOG.debug(_("ZeroMQ publisher enqueued %s") % message)
+        self.publish_everything()
