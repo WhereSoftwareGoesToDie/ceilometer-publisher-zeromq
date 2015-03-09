@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name="ceilometer-publisher-zeromq",
-    version="0.0.2",
+    version="0.0.3",
     description="A publisher plugin for Ceilometer that outputs to a collector via ZeroMQ",
     author="Oswyn Brent",
     author_email="oswyn.brent@anchor.com.au",

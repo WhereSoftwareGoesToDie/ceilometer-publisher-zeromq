@@ -42,7 +42,7 @@ def main(argv=None):
     #Use the publisher to publish a single message
     new_pid = os.fork()
     if new_pid == 0:
-        queue.QueuePublisher(
+        queue.ZeroMQPublisher(
             SplitResult(scheme = 'tcp', netloc='', path='', query='', fragment='')
         ).publish_samples(None, [stub_sample()])
         os._exit(0)
