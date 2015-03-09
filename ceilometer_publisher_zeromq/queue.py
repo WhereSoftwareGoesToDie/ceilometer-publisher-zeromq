@@ -5,6 +5,7 @@ from oslo.config import cfg
 import json
 import zmq
 from Queue import Queue, Empty
+import threading
 
 LOG = log.getLogger(__name__)
 
@@ -22,6 +23,7 @@ class ZeroMQPublisher(publisher.PublisherBase):
 
     def __init__(self, parsed_url):
         LOG.info("ZeroMQ publisher starting up")
+        self.lock = threading.Lock()
         super(ZeroMQPublisher, self).__init__(parsed_url)
         self.context = None
         self.socket  = None
@@ -43,6 +45,7 @@ class ZeroMQPublisher(publisher.PublisherBase):
     def publish_everything(self):
         """Attempt to publish a single sample"""
         while not self.queue.empty():
+            self.lock.acquire(True)
             try:
                 message = self.queue.get(block=False)
                 self.socket.send(message)
@@ -57,6 +60,8 @@ class ZeroMQPublisher(publisher.PublisherBase):
             except Empty:
                 #Queue is empty, publishing is finished
                 pass
+            finally:
+                self.lock.release()
 
     def publish_samples(self, context, samples):
         """
