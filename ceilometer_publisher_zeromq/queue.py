@@ -45,7 +45,7 @@ class ZeroMQPublisher(publisher.PublisherBase):
     def publish_everything(self):
         """Attempt to publish a single sample"""
         while not self.queue.empty():
-            self.lock.acquire(blocking=True)
+            self.lock.acquire(True)
             try:
                 message = self.queue.get(block=False)
                 self.socket.send(message)
